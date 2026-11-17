@@ -1,0 +1,31 @@
+[project]
+name = "py-trimlight"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Joe Savage", email = "joe.savage@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+py-trimlight = "py_trimlight:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.5",
+]
+
+[[tool.uv.index]]
+name = "artifactory-local"
+url = "https://artifactory-local.silabs.net/artifactory/api/pypi/infrasw-python-local/simple"
+
+[[tool.uv.index]]
+name = "artifactory"
+url = "https://artifactory.silabs.net/artifactory/api/pypi/infrasw-python-local/simple"
