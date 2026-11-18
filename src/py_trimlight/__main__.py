@@ -15,9 +15,12 @@ from py_trimlight.trimlight_local_client import (
 
 
 async def main():
-    async with TrimlightLocalClient("10.4.1.90", reply_timeout=1) as client:
+    async with TrimlightLocalClient("10.4.1.90", reply_timeout=1.5) as client:
         print("Connected to Trimlight device")
-        print_state(client)
+        for _ in range(10):
+            await asyncio.sleep(1)
+            await client.sync(fresh=True)
+        #print_state(client)
 
 
 def print_state(client: TrimlightLocalClient) -> None:

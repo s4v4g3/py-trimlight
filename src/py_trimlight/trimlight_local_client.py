@@ -22,7 +22,7 @@ from datetime import time as dtime
 from enum import IntEnum
 from typing import Self
 
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, stop_after_attempt, wait_fixed, after_log
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -794,7 +794,7 @@ class TrimlightLocalClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1), after=after_log(_LOGGER, logging.DEBUG))
     async def connect(self) -> SyncState:
         """Connect once, without waiting if the controller is busy with another client."""
         async with self._lock:
@@ -1131,7 +1131,7 @@ class TrimlightLocalClient:
         )
         self._touch()
         self.verified = await self._verify_locked()
-        await asyncio.sleep(POST_VERIFY_DELAY)
+        await asyncio.sleep(POST_VERIFY_DELAY + 0.2)
         await self._sync_locked()
 
     async def _close_locked(self) -> None:
@@ -1177,7 +1177,7 @@ class TrimlightLocalClient:
             )
         return ok
 
-    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1), after=after_log(_LOGGER, logging.DEBUG))
     async def _sync_locked(self) -> None:
         body = encode_passthrough(Sub.SYNC, sync_request_data(self._clock()))
         reply = await self._exchange(
