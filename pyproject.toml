@@ -7,10 +7,10 @@ authors = [
     { name = "Joe Savage", email = "joe.savage@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
-
-[project.scripts]
-py-trimlight = "py_trimlight:main"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.14.3",
+]
 
 [build-system]
 requires = ["uv_build>=0.13.5,<0.14.0"]
@@ -22,10 +22,20 @@ dev = [
     "ruff>=0.17.5",
 ]
 
-[[tool.uv.index]]
-name = "artifactory-local"
-url = "https://artifactory-local.silabs.net/artifactory/api/pypi/infrasw-python-local/simple"
+[tool.ruff.lint]
+extend-select = [
+    "I",     # isort - import sorting
+    "UP",    # pyupgrade - modernize Python code
+    "B",     # flake8-bugbear - find likely bugs
+    "S",     # flake8-bandit - security
+    "C4",    # flake8-comprehensions - better comprehensions
+    "SIM",   # flake8-simplify - simplify code
+    "PL",    # pylint - comprehensive code analysis
+]
 
-[[tool.uv.index]]
-name = "artifactory"
-url = "https://artifactory.silabs.net/artifactory/api/pypi/infrasw-python-local/simple"
+# Ignore rules that are too strict for this project
+ignore = [
+    "S101",   # Use of assert (fine in non-production code)
+    "PLR0913", # Too many arguments (sometimes necessary)
+    "PLR2004", # Magic value used in comparison (sometimes fine)
+]
