@@ -22,6 +22,8 @@ from datetime import time as dtime
 from enum import IntEnum
 from typing import Self
 
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 _LOGGER = logging.getLogger(__name__)
 
 TCP_PORT = 8586
@@ -792,6 +794,7 @@ class TrimlightLocalClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
     async def connect(self) -> SyncState:
         """Connect once, without waiting if the controller is busy with another client."""
         async with self._lock:
@@ -1174,16 +1177,18 @@ class TrimlightLocalClient:
             )
         return ok
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
     async def _sync_locked(self) -> None:
         body = encode_passthrough(Sub.SYNC, sync_request_data(self._clock()))
         reply = await self._exchange(
             encode_frame(Command.PASSTHROUGH, body),
             lambda m: isinstance(m, Frame) and m.sub == Sub.SYNC,
+            timeout=0.5,
         )
         assert isinstance(reply, Frame)
         self.state = SyncState.from_data(reply.data)
         self._synced_at = time.monotonic()
-        _LOGGER.debug("%s sync: %s", self.host, reply.data.hex())
+        # _LOGGER.debug("%s sync: %s", self.host, reply.data.hex())
 
     async def _exchange(
         self,
